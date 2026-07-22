@@ -1,0 +1,104 @@
+# ⚡ Smart Electricity Monitoring & Energy Management System
+
+A full-stack Flask web application that lets users track appliance-wise electricity
+consumption, estimate their electricity bill, view interactive dashboards, and
+generate/export usage reports.
+
+## Tech Stack
+- **Frontend:** HTML5, CSS3, Bootstrap 5, JavaScript, Chart.js
+- **Backend:** Python Flask (Blueprints)
+- **Database:** SQLite by default (zero setup) — MySQL-ready via config
+- **Auth:** Flask-Login + password hashing (Werkzeug)
+- **ORM:** SQLAlchemy (Flask-SQLAlchemy)
+
+## Features
+- User registration / login / logout with hashed passwords
+- Dashboard: today's usage, monthly usage, estimated bill, highest-consuming appliance, charts
+- Appliance CRUD with presets (Fan, TV, AC, Fridge, Washing Machine, Laptop, Computer, Motor, Cooler, Custom)
+- Automatic energy calculation: `Energy (kWh) = (Watt × Hours × Quantity) / 1000`
+- Configurable tariff rate & automatic bill estimation
+- Daily / Weekly / Monthly reports with CSV and PDF export
+- Pie chart, bar chart, and usage-history line chart (Chart.js)
+- Admin panel: view all users, system-wide stats, delete users
+
+## Project Structure
+```
+Smart-Electricity-Monitoring-System/
+├── app.py              # App factory, blueprint registration, admin seeding
+├── config.py           # Configuration (DB URI, secret key)
+├── models.py           # User, Appliance, Report models
+├── auth.py             # Register / login / logout blueprint
+├── energy.py           # Appliance CRUD blueprint
+├── bill.py             # Reports, bill estimation, CSV/PDF export
+├── routes.py           # Dashboard, profile, admin panel
+├── database.sql        # Optional MySQL schema
+├── requirements.txt
+├── templates/           # Jinja2 templates (Bootstrap 5 UI)
+├── static/
+│   ├── css/style.css
+│   └── js/charts.js
+└── README.md
+```
+
+## Getting Started
+
+### 1. Clone & set up a virtual environment
+```bash
+git clone <your-repo-url>
+cd Smart-Electricity-Monitoring-System
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+```
+
+### 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the app
+```bash
+python app.py
+```
+The app runs at **http://localhost:5000** and creates a local `energy.db`
+(SQLite) automatically on first run, along with a default admin account:
+
+- **Email:** admin@energy.com
+- **Password:** admin123
+
+### 4. (Optional) Use MySQL instead of SQLite
+1. Run `database.sql` on your MySQL server to create the schema, **or** let
+   SQLAlchemy create it automatically once you point to a MySQL database.
+2. Set an environment variable before running the app:
+   ```bash
+   export DATABASE_URL="mysql+pymysql://username:password@localhost/energy_db"
+   python app.py
+   ```
+
+## How the Calculations Work
+
+**Daily energy per appliance:**
+```
+Energy (kWh) = (Watt × Hours × Quantity) / 1000
+```
+Example: a 100W fan used 10 hours/day, quantity 2 → (100 × 10 × 2) / 1000 = **2 kWh/day**
+
+**Monthly estimate:** daily energy × 30
+
+**Bill estimate:** monthly energy × tariff rate (₹/kWh, editable in Profile)
+
+## Deployment (Render)
+1. Push this repo to GitHub.
+2. Create a new **Web Service** on Render, connect the repo.
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `gunicorn app:app`
+5. Add environment variables `SECRET_KEY` and (optionally) `DATABASE_URL` for a managed MySQL/Postgres instance.
+
+## Resume Description
+> Developed a full-stack web application using Flask and SQLAlchemy/MySQL to
+> monitor appliance-wise electricity consumption. Implemented energy usage
+> analytics, monthly bill prediction, and interactive dashboards using Chart.js.
+> Designed secure authentication, report generation, and appliance management
+> modules with a responsive Bootstrap UI.
+
+## License
+Free to use for learning, portfolio, and resume purposes.

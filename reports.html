@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Profile - Smart Energy{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><i class="fa-solid fa-user"></i> My Profile</div>
+      <div class="card-body">
+        <p><strong>Name:</strong> {{ current_user.name }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+        <p class="mb-0"><strong>Member since:</strong> {{ current_user.created_at.strftime('%d %b %Y') }}</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-indian-rupee-sign"></i> Electricity Tariff</div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('bill.update_tariff') }}">
+          <div class="mb-3">
+            <label class="form-label">Tariff Rate (₹ per kWh)</label>
+            <input type="number" step="0.1" min="0.1" name="tariff_rate" class="form-control"
+                   value="{{ current_user.tariff_rate }}" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Update Tariff</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

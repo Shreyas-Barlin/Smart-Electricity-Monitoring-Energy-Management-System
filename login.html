@@ -1,0 +1,101 @@
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask_login import login_required, current_user
+from models import db, User, Appliance, Report
+
+main_bp = Blueprint('main', __name__)
+
+
+@main_bp.route('/')
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    return redirect(url_for('auth.login'))
+
+
+@main_bp.route('/dashboard')
+@login_required
+def dashboard():
+    appliances = Appliance.query.filter_by(user_id=current_user.id).all()
+
+    total_energy = current_user.total_daily_energy
+    monthly_energy = current_user.total_monthly_energy
+    estimated_bill = current_user.estimated_monthly_bill
+    highest = current_user.highest_consuming_appliance
+
+    # Data for charts: appliance-wise daily energy (for pie/bar chart)
+    chart_labels = [a.name for a in appliances]
+    chart_values = [a.daily_energy_kwh for a in appliances]
+
+    # Last 30 days of report history for the line/monthly graph
+    reports = Report.query.filter_by(user_id=current_user.id)\
+        .order_by(Report.date.asc()).limit(30).all()
+    history_labels = [r.date.strftime('%d %b') for r in reports]
+    history_values = [r.energy_used for r in reports]
+
+    return render_template(
+        'dashboard.html',
+        total_energy=round(total_energy, 2),
+        monthly_energy=round(monthly_energy, 2),
+        estimated_bill=estimated_bill,
+        highest=highest,
+        appliance_count=len(appliances),
+        chart_labels=chart_labels,
+        chart_values=chart_values,
+        history_labels=history_labels,
+        history_values=history_values
+    )
+
+
+@main_bp.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
+
+# ---------------- Admin Panel ----------------
+
+def admin_required():
+    if not current_user.is_authenticated or not current_user.is_admin:
+        abort(403)
+
+
+@main_bp.route('/admin')
+@login_required
+def admin_panel():
+    admin_required()
+    users = User.query.all()
+
+    stats = []
+    total_system_energy = 0
+    for u in users:
+        daily = u.total_daily_energy
+        total_system_energy += daily
+        stats.append({
+            'user': u,
+            'appliance_count': len(u.appliances),
+            'daily_energy': round(daily, 2),
+            'monthly_energy': round(u.total_monthly_energy, 2),
+            'estimated_bill': u.estimated_monthly_bill
+        })
+
+    return render_template(
+        'admin.html',
+        stats=stats,
+        total_users=len(users),
+        total_system_energy=round(total_system_energy, 2)
+    )
+
+
+@main_bp.route('/admin/delete/<int:user_id>', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    admin_required()
+    if user_id == current_user.id:
+        flash("You can't delete your own admin account.", 'danger')
+        return redirect(url_for('main.admin_panel'))
+
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'User {user.name} deleted.', 'info')
+    return redirect(url_for('main.admin_panel'))

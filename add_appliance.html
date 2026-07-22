@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel - Smart Energy{% endblock %}
+{% block content %}
+
+<h4 class="mb-3"><i class="fa-solid fa-user-shield"></i> Admin Panel</h4>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card stat-card text-white bg-primary">
+      <div class="card-body">
+        <div class="small">Total Users</div>
+        <div class="fs-4 fw-bold">{{ total_users }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card stat-card text-white bg-success">
+      <div class="card-body">
+        <div class="small">System-wide Daily Consumption</div>
+        <div class="fs-4 fw-bold">{{ total_system_energy }} kWh</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">All Users</div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Appliances</th>
+            <th>Daily (kWh)</th><th>Monthly (kWh)</th><th>Est. Bill (₹)</th><th>Role</th><th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in stats %}
+          <tr>
+            <td>{{ s.user.name }}</td>
+            <td>{{ s.user.email }}</td>
+            <td>{{ s.appliance_count }}</td>
+            <td>{{ s.daily_energy }}</td>
+            <td>{{ s.monthly_energy }}</td>
+            <td>₹{{ s.estimated_bill }}</td>
+            <td>{% if s.user.is_admin %}<span class="badge bg-dark">Admin</span>{% else %}<span class="badge bg-secondary">User</span>{% endif %}</td>
+            <td class="text-end">
+              {% if not s.user.is_admin %}
+              <form action="{{ url_for('main.admin_delete_user', user_id=s.user.id) }}" method="POST" class="d-inline"
+                    onsubmit="return confirm('Delete user {{ s.user.name }}? This will remove all their data.');">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

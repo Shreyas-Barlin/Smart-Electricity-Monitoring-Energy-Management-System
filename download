@@ -1,0 +1,19 @@
+import os
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-this-in-production')
+
+    # Default: SQLite (zero setup, works instantly).
+    # To use MySQL instead, set an environment variable, e.g.:
+    #   DATABASE_URL=mysql+pymysql://username:password@localhost/energy_db
+    # and install PyMySQL (already in requirements.txt).
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        'sqlite:///' + os.path.join(basedir, 'energy.db')
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    DEFAULT_TARIFF = 8.0  # ₹ per kWh

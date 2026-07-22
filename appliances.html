@@ -1,0 +1,78 @@
+// Renders the dashboard charts using Chart.js
+// Expects chartLabels, chartValues, historyLabels, historyValues to be defined
+// in a preceding <script> block on the dashboard page.
+
+document.addEventListener('DOMContentLoaded', function () {
+  const palette = [
+    '#1976d2', '#43a047', '#fb8c00', '#e53935', '#8e24aa',
+    '#00897b', '#3949ab', '#c0ca33', '#6d4c41', '#00acc1'
+  ];
+
+  if (typeof chartLabels !== 'undefined' && chartLabels.length > 0) {
+    // Pie chart - appliance-wise share of consumption
+    const pieCtx = document.getElementById('pieChart');
+    if (pieCtx) {
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            data: chartValues,
+            backgroundColor: palette
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    // Bar chart - appliance comparison
+    const barCtx = document.getElementById('barChart');
+    if (barCtx) {
+      new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Daily kWh',
+            data: chartValues,
+            backgroundColor: '#1976d2'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  }
+
+  // Line chart - historical usage trend
+  if (typeof historyLabels !== 'undefined' && historyLabels.length > 0) {
+    const lineCtx = document.getElementById('lineChart');
+    if (lineCtx) {
+      new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: historyLabels,
+          datasets: [{
+            label: 'Energy Used (kWh)',
+            data: historyValues,
+            borderColor: '#43a047',
+            backgroundColor: 'rgba(67, 160, 71, 0.15)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  }
+});

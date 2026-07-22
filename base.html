@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Smart Energy{% endblock %}
+{% block content %}
+
+<h3 class="mb-4">Welcome, {{ current_user.name }} <i class="fa-solid fa-hand-wave text-warning"></i></h3>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="card stat-card text-white bg-primary h-100">
+      <div class="card-body">
+        <div class="small">Today's Usage</div>
+        <div class="fs-4 fw-bold">{{ total_energy }} kWh</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card stat-card text-white bg-success h-100">
+      <div class="card-body">
+        <div class="small">Monthly Usage (est.)</div>
+        <div class="fs-4 fw-bold">{{ monthly_energy }} kWh</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card stat-card text-white bg-warning h-100">
+      <div class="card-body">
+        <div class="small">Estimated Bill</div>
+        <div class="fs-4 fw-bold">₹{{ estimated_bill }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card stat-card text-white bg-danger h-100">
+      <div class="card-body">
+        <div class="small">Highest Consumer</div>
+        <div class="fs-6 fw-bold">
+          {% if highest %}{{ highest.name }} ({{ highest.daily_energy_kwh }} kWh){% else %}No appliances yet{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-4 d-flex align-items-stretch">
+    <div class="card w-100">
+      <div class="card-header">Appliance-wise Consumption</div>
+      <div class="card-body">
+        {% if chart_labels %}
+        <canvas id="pieChart"></canvas>
+        {% else %}
+        <p class="text-muted mb-0">Add appliances to see this chart.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 d-flex align-items-stretch">
+    <div class="card w-100">
+      <div class="card-header">Appliance Comparison</div>
+      <div class="card-body">
+        {% if chart_labels %}
+        <canvas id="barChart"></canvas>
+        {% else %}
+        <p class="text-muted mb-0">Add appliances to see this chart.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 d-flex align-items-stretch">
+    <div class="card w-100">
+      <div class="card-header">Usage History</div>
+      <div class="card-body">
+        {% if history_labels %}
+        <canvas id="lineChart"></canvas>
+        {% else %}
+        <p class="text-muted mb-0">Generate reports to build history (see Reports page).</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex gap-2">
+  <a href="{{ url_for('energy.add_appliance') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Appliance</a>
+  <a href="{{ url_for('energy.appliances') }}" class="btn btn-outline-primary"><i class="fa-solid fa-list"></i> Manage Appliances ({{ appliance_count }})</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const chartLabels = {{ chart_labels | tojson }};
+  const chartValues = {{ chart_values | tojson }};
+  const historyLabels = {{ history_labels | tojson }};
+  const historyValues = {{ history_values | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
